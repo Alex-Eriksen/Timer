@@ -69,35 +69,41 @@ public class MainActivity extends AppCompatActivity {
         Button btn_start = (Button) view.findViewById(R.id.btn_start);
         Button btn_stop = (Button) view.findViewById(R.id.btn_stop);
         Button btn_reset = (Button) view.findViewById(R.id.btn_reset);
+        Button btn_delete = (Button) view.findViewById(R.id.btn_delete);
 
         timer_container.addView(view);
-        TimerThread timerThread = new TimerThread(numbersToAdd, textView, this);
+        TimerThread timerThread = new TimerThread(numbersToAdd, textView, this, (LinearLayout) view);
         Thread thread = new Thread(timerThread);
         btn_start.setOnClickListener(v->{
             timerThread.start();
         });
         btn_stop.setOnClickListener(v->{
-            timerThread.stop();
+            timerThread.stopTimer();
         });
         btn_reset.setOnClickListener(v->{
             timerThread.reset();
         });
+        btn_delete.setOnClickListener(v->{
+            timerThread.delete();
+        });
     }
 }
 
-class TimerThread implements Runnable {
+class TimerThread extends Thread {
 
     private int startTime;
     private int numberOfSecondsRemaining;
     private boolean isRunning;
+    private LinearLayout layout;
     private TextView view;
     private MainActivity activity;
 
-    public TimerThread(int numberOfSecondsRemaining, TextView view, MainActivity activity) {
+    public TimerThread(int numberOfSecondsRemaining, TextView view, MainActivity activity, LinearLayout layout) {
         this.startTime = numberOfSecondsRemaining;
         this.numberOfSecondsRemaining = numberOfSecondsRemaining;
         this.view = view;
         this.activity = activity;
+        this.layout = layout;
         updateText();
     }
 
@@ -122,13 +128,18 @@ class TimerThread implements Runnable {
         Thread thread = new Thread(this);
         thread.start();
     }
-    public void stop(){
+    public void stopTimer(){
         isRunning = false;
     }
     public void reset(){
         this.numberOfSecondsRemaining = this.startTime;
-        stop();
+        stopTimer();
         updateText();
+    }
+
+    public void delete() {
+        ((ViewGroup)this.layout.getParent()).removeView(this.layout);
+        stopTimer();
     }
 
     private void updateText(){
